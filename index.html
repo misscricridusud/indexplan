@@ -7,7 +7,7 @@
   <style>
     :root{
       --page-bg: linear-gradient(135deg,#7dd3fc 0%,#fde68a 48%,#fbbf24 100%);
-      --bg:#0f172a; --card:rgba(15,23,42,.50); --section:rgba(15,23,42,.62);
+      --bg:#0f172a; --card:rgba(15,23,42,.38); --section:rgba(15,23,42,.52);
       --accent:#facc15; --text:#f8fafc; --muted:#d1d5db;
     }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -35,18 +35,19 @@
     input{width:100%;margin:5px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:var(--text)}input::placeholder{color:#e5e7eb}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.fond-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
     .fond-card{height:88px;border-radius:18px;border:2px solid rgba(255,255,255,.22);display:flex;align-items:flex-end;padding:9px;font-weight:900;text-shadow:0 2px 8px #000;cursor:pointer;overflow:hidden;background-size:cover;background-position:center}.fond-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(250,204,21,.35)}
-    .plage{background:linear-gradient(180deg,#7dd3fc 0%,#bae6fd 38%,#38bdf8 39%,#0ea5e9 58%,#fbbf24 59%,#fde68a 100%)}
-    .mer{background:linear-gradient(180deg,#a7f3d0 0%,#38bdf8 34%,#0ea5e9 55%,#0369a1 100%)}
-    .campagne{background:linear-gradient(180deg,#bfdbfe 0%,#ecfccb 36%,#65a30d 37%,#84cc16 68%,#a3e635 100%)}
-    .arc{background:radial-gradient(circle at 20% 20%,#fde047 0 12%,transparent 13%),linear-gradient(135deg,#ef4444,#f97316,#facc15,#22c55e,#3b82f6,#a855f7)}
-    .nuit{background:radial-gradient(circle at 75% 18%,#fef3c7 0 8%,transparent 9%),linear-gradient(180deg,#020617,#1e1b4b 55%,#312e81)}
-    .rose{background:linear-gradient(135deg,#fb7185,#f9a8d4,#c084fc)}
+    .plage{background-image:url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80")}
+    .mer{background-image:url("https://images.unsplash.com/photo-1501959915551-4e8a04a3f1a9?auto=format&fit=crop&w=700&q=80")}
+    .campagne{background-image:url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=700&q=80")}
+    .foret{background-image:url("https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=700&q=80")}
+    .nuit{background-image:url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80")}
+    .fleurs{background-image:url("https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=700&q=80")}
+    .fallback-bg{background:linear-gradient(135deg,#0f172a,#334155)}
     .small{font-size:.82rem;color:var(--muted);margin-top:6px}.hidden{display:none}.danger{background:rgba(239,68,68,.18)}
   </style>
 </head>
 <body>
   <main class="app">
-    <div class="header"><div class="title">Rituel du matin</div><div class="subtitle">Bonjour Cricri 🌞</div></div>
+    <div class="header"><div class="title">Rituel du matin</div><div class="subtitle" id="bonjourTitre">Bonjour 🌞</div></div>
 
     <section class="section">
       <div class="section-title">Lecture vocale</div>
@@ -56,17 +57,26 @@
       <div id="voiceStatus" class="small">Clique sur “Tester la voix”. Vérifie aussi que l’onglet n’est pas en muet.</div>
     </section>
 
+
+
+    <section class="section">
+      <div class="section-title">Prénom</div>
+      <input id="prenom" placeholder="Entre ton prénom" />
+      <button onclick="sauverPrenom()">Enregistrer mon prénom</button>
+      <div class="small">Le prénom reste enregistré seulement sur l’appareil de la personne.</div>
+    </section>
+
     <section class="section">
       <div class="section-title">Fond visuel</div>
       <div class="fond-grid">
         <div class="fond-card plage" data-fond="plage" onclick="changerFond('plage')">Plage 🏖️</div>
         <div class="fond-card mer" data-fond="mer" onclick="changerFond('mer')">Mer 🌊</div>
         <div class="fond-card campagne" data-fond="campagne" onclick="changerFond('campagne')">Campagne 🌾</div>
-        <div class="fond-card arc" data-fond="arc" onclick="changerFond('arc')">Arc‑en‑ciel 🌈</div>
-        <div class="fond-card nuit" data-fond="nuit" onclick="changerFond('nuit')">Nuit ✨</div>
-        <div class="fond-card rose" data-fond="rose" onclick="changerFond('rose')">Girly 💖</div>
+        <div class="fond-card foret" data-fond="foret" onclick="changerFond('foret')">Forêt 🌲</div>
+        <div class="fond-card nuit" data-fond="nuit" onclick="changerFond('nuit')">Coucher de soleil 🌅</div>
+        <div class="fond-card fleurs" data-fond="fleurs" onclick="changerFond('fleurs')">Fleurs 🌸</div>
       </div>
-      <div class="small">Ce ne sont plus des images Internet : ce sont des fonds intégrés au code, donc ça doit s’afficher sur GitHub.</div>
+      <div class="small">Là ce sont de vraies photos. Il faut être connecté à Internet pour les charger sur le site.</div>
     </section>
 
     <section class="section">
@@ -91,20 +101,43 @@
 
 <script>
 const fonds={
-  plage:"linear-gradient(180deg,#7dd3fc 0%,#bae6fd 38%,#38bdf8 39%,#0ea5e9 58%,#fbbf24 59%,#fde68a 100%)",
-  mer:"linear-gradient(180deg,#a7f3d0 0%,#38bdf8 34%,#0ea5e9 55%,#0369a1 100%)",
-  campagne:"linear-gradient(180deg,#bfdbfe 0%,#ecfccb 36%,#65a30d 37%,#84cc16 68%,#a3e635 100%)",
-  arc:"radial-gradient(circle at 20% 20%,#fde047 0 8%,transparent 9%),linear-gradient(135deg,#ef4444,#f97316,#facc15,#22c55e,#3b82f6,#a855f7)",
-  nuit:"radial-gradient(circle at 75% 18%,#fef3c7 0 6%,transparent 7%),linear-gradient(180deg,#020617,#1e1b4b 55%,#312e81)",
-  rose:"linear-gradient(135deg,#fb7185,#f9a8d4,#c084fc)"
+  plage:"url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=85')",
+  mer:"url('https://images.unsplash.com/photo-1501959915551-4e8a04a3f1a9?auto=format&fit=crop&w=1600&q=85')",
+  campagne:"url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=85')",
+  foret:"url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1600&q=85')",
+  nuit:"url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85')",
+  fleurs:"url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1600&q=85')"
 };
 function changerFond(nom){
-  document.body.style.background=fonds[nom]||fonds.plage;
+  document.body.style.backgroundImage=fonds[nom]||fonds.plage;
+  document.body.style.backgroundSize="cover";
+  document.body.style.backgroundPosition="center";
   document.body.style.backgroundAttachment="fixed";
+  document.body.classList.add("fallback-bg");
   localStorage.setItem("fondRituel",nom);
   document.querySelectorAll(".fond-card").forEach(c=>c.classList.toggle("active",c.dataset.fond===nom));
 }
 changerFond(localStorage.getItem("fondRituel")||"plage");
+
+function getPrenom(){
+  return (localStorage.getItem("prenomRituel") || document.getElementById("prenom")?.value || "").trim() || "toi";
+}
+function afficherPrenom(){
+  const prenom = getPrenom();
+  document.getElementById("bonjourTitre").textContent = "Bonjour " + prenom + " 🌞";
+  const champ = document.getElementById("prenom");
+  if(champ && localStorage.getItem("prenomRituel")) champ.value = localStorage.getItem("prenomRituel");
+}
+function sauverPrenom(){
+  const prenom = document.getElementById("prenom").value.trim();
+  if(!prenom){
+    localStorage.removeItem("prenomRituel");
+  } else {
+    localStorage.setItem("prenomRituel", prenom);
+  }
+  afficherPrenom();
+}
+afficherPrenom();
 
 function meteoTexte(code){
   const d={0:"ciel dégagé ☀️",1:"principalement dégagé 🌤️",2:"partiellement nuageux ⛅",3:"couvert ☁️",45:"brouillard 🌫️",48:"brouillard givrant 🌫️",51:"bruine légère 🌦️",53:"bruine 🌦️",55:"bruine forte 🌧️",61:"pluie faible 🌧️",63:"pluie 🌧️",65:"forte pluie 🌧️",71:"neige faible ❄️",73:"neige ❄️",75:"forte neige ❄️",80:"averses faibles 🌦️",81:"averses 🌧️",82:"fortes averses 🌧️",95:"orage ⛈️"};
@@ -156,13 +189,13 @@ function parler(texte){
   u.onerror=()=>statutVoix("La voix est bloquée : clique une fois sur la page puis sur Tester la voix. Vérifie aussi le son de l’onglet.");
   setTimeout(()=>{speechSynthesis.resume(); speechSynthesis.speak(u);},80);
 }
-function testerVoix(){parler("Bonjour Cricri. Si tu entends cette phrase, la voix fonctionne.");}
+function testerVoix(){parler("Bonjour " + getPrenom() + ". Si tu entends cette phrase, la voix fonctionne.");}
 function lireRituel(){
   const meteo=document.getElementById("meteo").innerText;
   const saint=document.getElementById("saint").innerText;
   const dicton=document.getElementById("dicton").innerText;
   const rdv=document.getElementById("rdv").innerText;
-  parler("Bonjour Cricri. Voici ton rituel du matin. "+meteo+". "+saint+". Le dicton du jour : "+dicton+". "+rdv);
+  parler("Bonjour " + getPrenom() + ". Voici ton rituel du matin. "+meteo+". "+saint+". Le dicton du jour : "+dicton+". "+rdv);
 }
 function stopVoix(){if("speechSynthesis" in window){speechSynthesis.cancel();statutVoix("Lecture arrêtée.");}}
 if("speechSynthesis" in window){speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
