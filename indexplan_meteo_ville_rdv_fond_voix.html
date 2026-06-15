@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rituel du matin – Android</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #facc15;
+      --text: #e5e7eb;
+      --muted: #d1d5db;
+      --app-glass: rgba(15, 23, 42, 0.42);
+      --section-glass: rgba(15, 23, 42, 0.58);
+      --fond-opacity: 0.95;
+      --fond-blur: 0px;
+      --fond-scale: 1.01;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: background 0.3s ease;
+    }
+    .app {
+      width: 100%;
+      max-width: 520px;
+      background: var(--app-glass);
+      border-radius: 28px;
+      padding: 18px 18px 22px;
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(148, 163, 184, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: var(--fond-opacity);
+      pointer-events: none;
+      background-size: cover;
+      background-position: center;
+      filter: blur(var(--fond-blur));
+      transform: scale(var(--fond-scale));
+      transition: opacity 0.3s ease, background-image 0.3s ease;
+    }
+    .app-inner {
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(2px);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.75);
+    }
+    .subtitle {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f9fafb;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+    }
+    .section {
+      margin-top: 12px;
+      padding: 12px 12px 10px;
+      border-radius: 18px;
+      background: var(--section-glass);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+    }
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .main-message {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #f9fafb;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.75);
+    }
+    .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .saint {
+      color: #f97316;
+      font-weight: 600;
+    }
+    .dicton {
+      font-style: italic;
+      color: #f9fafb;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.75);
+      margin-top: 4px;
+    }
+    .weather-form,
+    .rdv-form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    input {
+      flex: 1;
+      min-width: 160px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 9px 12px;
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+    }
+    input::placeholder {
+      color: var(--muted);
+    }
+    .fond-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .fond-card {
+      min-height: 86px;
+      border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.22);
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 10px;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 -45px 45px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .fond-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .fond-card.active {
+      border-color: var(--accent);
+      box-shadow: inset 0 -45px 45px rgba(0,0,0,0.55), 0 0 0 3px rgba(250,204,21,0.28);
+    }
+    .fond-label {
+      font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+    }
+    .custom-bg-zone {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.14);
+    }
+    .file-label {
+      display: inline-block;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 14px;
+      border-radius: 12px;
+      color: var(--text);
+      margin: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .file-label:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 14px;
+      border-radius: 12px;
+      color: var(--text);
+      margin: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    .fond-visibilite {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.14);
+    }
+    .fond-visibilite button.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="bg-layer"></div>
+
+    <div class="app-inner">
+
+      <!-- HEADER -->
+      <div class="header">
+        <div class="title-block">
+          <div class="title">Rituel du matin</div>
+          <div class="subtitle">Bonjour Cricri 🌞</div>
+        </div>
+      </div>
+
+      <!-- VOIX DU MATIN -->
+      <div class="section voice-section">
+        <div class="section-title">Lecture vocale</div>
+        <div class="main-message">
+          <button onclick="lireRituel()">🔊 Me lire mon rituel du matin</button>
+          <button onclick="arreterLecture()">⏹️ Stop</button>
+        </div>
+      </div>
+
+      <!-- CHOIX DU THÈME -->
+      <div class="section">
+        <div class="section-title">Choisir un thème</div>
+        <div class="main-message">
+          <button onclick="setTheme('clair')">Thème clair</button>
+          <button onclick="setTheme('sombre')">Thème sombre</button>
+          <button onclick="setTheme('fun')">Thème fun</button>
+          <button onclick="setTheme('premium')">Thème premium</button>
+        </div>
+      </div>
+
+      <!-- CHOIX DU FOND -->
+      <div class="section">
+        <div class="section-title">Image de fond</div>
+        <div class="main-message">
+          Choisis ton fond en cliquant sur une image :
+        </div>
+        <div class="fond-grid">
+          <div class="fond-card" data-bg="plage" onclick="setBackground('plage')" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')">
+            <span class="fond-label">Plage 🏖️</span>
+          </div>
+          <div class="fond-card" data-bg="mer" onclick="setBackground('mer')" style="background-image:url('https://images.unsplash.com/photo-1501959915551-4e8a04a3f1a9')">
+            <span class="fond-label">Mer 🌊</span>
+          </div>
+          <div class="fond-card" data-bg="campagne" onclick="setBackground('campagne')" style="background-image:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6')">
+            <span class="fond-label">Campagne 🌾</span>
+          </div>
+          <div class="fond-card" data-bg="arc" onclick="setBackground('arc')" style="background-image:url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21')">
+            <span class="fond-label">Arc‑en‑ciel 🌈</span>
+          </div>
+        </div>
+        <div class="fond-visibilite main-message">
+          Intensité du fond :
+          <button data-fond-mode="doux" onclick="setFondVisibilite('doux')">Doux</button>
+          <button data-fond-mode="visible" onclick="setFondVisibilite('visible')">Visible</button>
+          <button data-fond-mode="max" onclick="setFondVisibilite('max')">Très visible</button>
+        </div>
+        <div class="custom-bg-zone main-message">
+          <label class="file-label" for="customBg">Mettre ma propre image 📷</label>
+          <input id="customBg" type="file" accept="image/*" onchange="setCustomBackground(event)" />
+          <button onclick="resetBackground()">Retirer le fond</button>
+        </div>
+      </div>
+
+      <!-- MÉTÉO -->
+      <div class="section">
+        <div class="section-title">Météo du jour</div>
+        <div class="weather-form">
+          <input id="ville" type="text" placeholder="Entre ta ville" />
+          <button onclick="getMeteo()">Voir ma météo</button>
+        </div>
+        <div class="main-message" id="meteo">
+          Choisis ta ville pour afficher la météo ☀️
+        </div>
+      </div>
+
+      <!-- SAINT DU JOUR -->
+      <div class="section">
+        <div class="section-title">Saint du jour</div>
+        <div class="main-message" id="saint">
+          Chargement…
+        </div>
+      </div>
+
+      <!-- DICTON -->
+      <div class="section">
+        <div class="section-title">Dicton du jour</div>
+        <div class="dicton" id="dicton">
+          Chargement…
+        </div>
+      </div>
+
+      <!-- RENDEZ-VOUS -->
+      <div class="section">
+        <div class="section-title">Prochain rendez‑vous</div>
+        <div class="rdv-form">
+          <input id="rdvTitre" type="text" placeholder="Ex : médecin, coiffeur…" />
+          <input id="rdvDate" type="date" />
+          <input id="rdvHeure" type="time" />
+          <button onclick="sauverRdv()">Enregistrer</button>
+          <button onclick="supprimerRdv()">Supprimer</button>
+        </div>
+        <div class="main-message" id="rdv"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+/* --- THEMES --- */
+function setTheme(theme) {
+  if (theme === "clair") {
+    document.documentElement.style.setProperty("--bg", "#f3f4f6");
+    document.documentElement.style.setProperty("--text", "#111");
+    document.documentElement.style.setProperty("--card", "#fff");
+    document.documentElement.style.setProperty("--accent", "#2563eb");
+  }
+
+  if (theme === "sombre") {
+    document.documentElement.style.setProperty("--bg", "#0f172a");
+    document.documentElement.style.setProperty("--text", "#e5e7eb");
+    document.documentElement.style.setProperty("--card", "#111827");
+    document.documentElement.style.setProperty("--accent", "#facc15");
+  }
+
+  if (theme === "fun") {
+    document.documentElement.style.setProperty("--bg", "#ff7ee2");
+    document.documentElement.style.setProperty("--text", "#fff");
+    document.documentElement.style.setProperty("--card", "#ffb3f1");
+    document.documentElement.style.setProperty("--accent", "#00f5d4");
+  }
+
+  if (theme === "premium") {
+    document.documentElement.style.setProperty("--bg", "#1a1a1a");
+    document.documentElement.style.setProperty("--text", "#f5f5f5");
+    document.documentElement.style.setProperty("--card", "#2a2a2a");
+    document.documentElement.style.setProperty("--accent", "#d4af37");
+  }
+
+/* --- INTENSITÉ DU FOND --- */
+function setFondVisibilite(mode) {
+  const reglages = {
+    doux: { opacity: "0.55", blur: "5px", scale: "1.05", app: "rgba(15, 23, 42, 0.82)", section: "rgba(15, 23, 42, 0.88)" },
+    visible: { opacity: "0.85", blur: "1px", scale: "1.02", app: "rgba(15, 23, 42, 0.48)", section: "rgba(15, 23, 42, 0.66)" },
+    max: { opacity: "1", blur: "0px", scale: "1", app: "rgba(15, 23, 42, 0.25)", section: "rgba(15, 23, 42, 0.46)" }
+  };
+
+  const r = reglages[mode] || reglages.visible;
+  document.documentElement.style.setProperty("--fond-opacity", r.opacity);
+  document.documentElement.style.setProperty("--fond-blur", r.blur);
+  document.documentElement.style.setProperty("--fond-scale", r.scale);
+  document.documentElement.style.setProperty("--app-glass", r.app);
+  document.documentElement.style.setProperty("--section-glass", r.section);
+  localStorage.setItem("fondVisibilite", mode);
+
+  document.querySelectorAll("[data-fond-mode]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.fondMode === mode);
+  });
+}
+
+setFondVisibilite(localStorage.getItem("fondVisibilite") || "visible");
+
+/* --- FONDS VISUELS --- */
+const backgrounds = {
+  plage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+  mer: "https://images.unsplash.com/photo-1501959915551-4e8a04a3f1a9",
+  campagne: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6",
+  arc: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21"
+};
+
+function marquerFondActif(type) {
+  document.querySelectorAll(".fond-card").forEach(card => {
+    card.classList.toggle("active", card.dataset.bg === type);
+  });
+}
+
+function appliquerImageFond(imageUrl) {
+  const bg = document.querySelector(".bg-layer");
+  bg.style.backgroundImage = imageUrl ? "url('" + imageUrl + "')" : "none";
+}
+
+function setBackground(type) {
+  if (!backgrounds[type]) return;
+  appliquerImageFond(backgrounds[type]);
+  localStorage.setItem("fondType", type);
+  localStorage.removeItem("fondPerso");
+  marquerFondActif(type);
+}
+
+function setCustomBackground(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    appliquerImageFond(imageData);
+    localStorage.setItem("fondPerso", imageData);
+    localStorage.removeItem("fondType");
+    marquerFondActif("");
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetBackground() {
+  localStorage.removeItem("fondType");
+  localStorage.removeItem("fondPerso");
+  appliquerImageFond("");
+  marquerFondActif("");
+}
+
+const fondPerso = localStorage.getItem("fondPerso");
+const fondSauvegarde = localStorage.getItem("fondType");
+if (fondPerso) {
+  appliquerImageFond(fondPerso);
+} else if (fondSauvegarde && backgrounds[fondSauvegarde]) {
+  setBackground(fondSauvegarde);
+}
+
+/* --- MÉTÉO RÉELLE PAR VILLE --- */
+const meteoDescriptions = {
+  0: "ciel dégagé ☀️",
+  1: "principalement dégagé 🌤️",
+  2: "partiellement nuageux ⛅",
+  3: "couvert ☁️",
+  45: "brouillard 🌫️",
+  48: "brouillard givrant 🌫️",
+  51: "petite bruine 🌦️",
+  53: "bruine modérée 🌦️",
+  55: "forte bruine 🌧️",
+  61: "petite pluie 🌧️",
+  63: "pluie modérée 🌧️",
+  65: "forte pluie 🌧️",
+  71: "petite neige 🌨️",
+  73: "neige modérée 🌨️",
+  75: "forte neige ❄️",
+  80: "averses faibles 🌦️",
+  81: "averses modérées 🌧️",
+  82: "grosses averses ⛈️",
+  95: "orage ⛈️",
+  96: "orage avec grêle ⛈️",
+  99: "gros orage avec grêle ⛈️"
+};
+
+function messageMeteo(code) {
+  return meteoDescriptions[code] || "météo variable 🌤️";
+}
+
+async function getMeteo() {
+  const villeInput = document.getElementById("ville");
+  const meteoDiv = document.getElementById("meteo");
+  const ville = villeInput.value.trim();
+
+  if (!ville) {
+    meteoDiv.innerHTML = "Écris une ville pour afficher la météo 😊";
+    return;
+  }
+
+  meteoDiv.innerHTML = "Recherche de la météo pour <span class='highlight'>" + ville + "</span>…";
+
+  try {
+    // 1) On transforme la ville en coordonnées GPS avec Open‑Meteo Geocoding.
+    const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+      encodeURIComponent(ville) + "&count=1&language=fr&format=json";
+
+    const geoResponse = await fetch(geoUrl);
+    const geoData = await geoResponse.json();
+
+    if (!geoData.results || geoData.results.length === 0) {
+      meteoDiv.innerHTML = "Je n’ai pas trouvé cette ville. Essaie avec une ville proche.";
+      return;
+    }
+
+    const lieu = geoData.results[0];
+
+    // 2) On récupère la météo actuelle avec les coordonnées.
+    const meteoUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lieu.latitude +
+      "&longitude=" + lieu.longitude +
+      "&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto";
+
+    const meteoResponse = await fetch(meteoUrl);
+    const meteoData = await meteoResponse.json();
+    const current = meteoData.current;
+
+    if (!current) {
+      meteoDiv.innerHTML = "La météo n’est pas disponible pour cette ville pour le moment.";
+      return;
+    }
+
+    localStorage.setItem("villeMeteo", ville);
+
+    meteoDiv.innerHTML =
+      "Aujourd’hui à <span class='highlight'>" + lieu.name + "</span>" +
+      (lieu.admin1 ? " (" + lieu.admin1 + ")" : "") +
+      " : <span class='highlight'>" + Math.round(current.temperature_2m) + "°C</span>, " +
+      messageMeteo(current.weather_code) +
+      "<br>Vent : <span class='highlight'>" + Math.round(current.wind_speed_10m) + " km/h</span> 💨";
+
+  } catch (error) {
+    meteoDiv.innerHTML = "Impossible de charger la météo. Vérifie ta connexion internet.";
+  }
+}
+
+// La ville choisie reste enregistrée sur le téléphone ou le navigateur.
+const villeSauvegardee = localStorage.getItem("villeMeteo");
+if (villeSauvegardee) {
+  document.getElementById("ville").value = villeSauvegardee;
+  getMeteo();
+}
+
+/* --- SAINT DU JOUR --- */
+const saints = {
+  "06-15": "Germaine",
+  "06-16": "Jean‑François",
+  "06-17": "Hervé"
+};
+const today = new Date();
+const key = today.toISOString().slice(5,10);
+document.getElementById("saint").innerHTML =
+  "Nous fêtons les <span class='saint'>" + (saints[key] || "amis du jour") + "</span>.";
+
+/* --- DICTON --- */
+const dictons = [
+  "« Soleil de juin luit de grand matin. »",
+  "« Juin froid et pluvieux, tout l’an sera grincheux. »",
+  "« En juin, brume obscure, trois jours seulement dure. »"
+];
+
+document.getElementById("dicton").innerHTML =
+  dictons[Math.floor(Math.random() * dictons.length)];
+
+/* --- PROCHAIN RENDEZ-VOUS PERSONNEL --- */
+function formatDateFr(dateString) {
+  const date = new Date(dateString + "T00:00:00");
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function afficherRdv() {
+  const rdvDiv = document.getElementById("rdv");
+  const rdv = JSON.parse(localStorage.getItem("prochainRdv") || "null");
+
+  if (!rdv || !rdv.titre || !rdv.date || !rdv.heure) {
+    rdvDiv.innerHTML = "Aucun rendez-vous enregistré pour le moment.";
+    return;
+  }
+
+  const maintenant = new Date();
+  const dateRdv = new Date(rdv.date + "T" + rdv.heure);
+
+  if (dateRdv < maintenant) {
+    localStorage.removeItem("prochainRdv");
+    rdvDiv.innerHTML = "Aucun rendez-vous à venir.";
+    return;
+  }
+
+  document.getElementById("rdvTitre").value = rdv.titre;
+  document.getElementById("rdvDate").value = rdv.date;
+  document.getElementById("rdvHeure").value = rdv.heure;
+
+  rdvDiv.innerHTML =
+    "Votre prochain rendez-vous : <span class='highlight'>" + rdv.titre + "</span>" +
+    "<br>Le <span class='highlight'>" + formatDateFr(rdv.date) + "</span>" +
+    " à <span class='highlight'>" + rdv.heure + "</span> ⏰";
+}
+
+function sauverRdv() {
+  const titre = document.getElementById("rdvTitre").value.trim();
+  const date = document.getElementById("rdvDate").value;
+  const heure = document.getElementById("rdvHeure").value;
+  const rdvDiv = document.getElementById("rdv");
+
+  if (!titre || !date || !heure) {
+    rdvDiv.innerHTML = "Remplis le nom, la date et l’heure du rendez-vous 😊";
+    return;
+  }
+
+  localStorage.setItem("prochainRdv", JSON.stringify({ titre, date, heure }));
+  afficherRdv();
+}
+
+function supprimerRdv() {
+  localStorage.removeItem("prochainRdv");
+  document.getElementById("rdvTitre").value = "";
+  document.getElementById("rdvDate").value = "";
+  document.getElementById("rdvHeure").value = "";
+  afficherRdv();
+}
+
+afficherRdv();
+
+/* --- LECTURE VOCALE DU RITUEL --- */
+function nettoyerTexte(elementId) {
+  const el = document.getElementById(elementId);
+  return el ? el.innerText.replace(/\s+/g, " ").trim() : "";
+}
+
+function lireRituel() {
+  if (!("speechSynthesis" in window)) {
+    alert("La lecture vocale n'est pas disponible sur ce navigateur.");
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const meteo = nettoyerTexte("meteo");
+  const saint = nettoyerTexte("saint");
+  const dicton = nettoyerTexte("dicton");
+  const rdv = nettoyerTexte("rdv");
+
+  let texte = "Bonjour Cricri. Voici ton rituel du matin. ";
+
+  if (meteo) texte += "Météo du jour : " + meteo + ". ";
+  if (saint) texte += "Saint du jour : " + saint + ". ";
+  if (dicton) texte += "Dicton du jour : " + dicton + ". ";
+  if (rdv && !rdv.toLowerCase().includes("aucun rendez-vous")) {
+    texte += "Prochain rendez-vous : " + rdv + ". ";
+  } else {
+    texte += "Tu n'as pas de rendez-vous enregistré pour le moment. ";
+  }
+
+  const message = new SpeechSynthesisUtterance(texte);
+  message.lang = "fr-FR";
+  message.rate = 0.95;
+  message.pitch = 1.05;
+
+  const voix = speechSynthesis.getVoices();
+  const voixFr = voix.find(v => v.lang && v.lang.toLowerCase().startsWith("fr"));
+  if (voixFr) message.voice = voixFr;
+
+  speechSynthesis.speak(message);
+}
+
+function arreterLecture() {
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+  }
+}
+
+</script>
+
+</body>
+</html>
