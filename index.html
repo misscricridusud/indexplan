@@ -59,10 +59,12 @@
       </div>
       <div class="row">
         <button onclick="reglerVoix('douce')">Voix douce</button>
+        <button onclick="reglerVoix('hommeDoux')">Voix homme douce</button>
+        <button onclick="choisirVoixHommeDouce()">Trouver une voix homme</button>
         <button onclick="reglerVoix('normale')">Voix normale</button>
         <button onclick="reglerVoix('joyeuse')">Voix joyeuse</button>
       </div>
-      <div id="voiceStatus" class="small">Choisis une voix puis clique sur “Tester la voix”. Les voix disponibles dépendent du téléphone ou du navigateur.</div>
+      <div id="voiceStatus" class="small">Choisis une voix puis clique sur “Tester la voix”. Les voix disponibles dépendent du téléphone ou du navigateur. Le bouton “voix homme” choisit une voix masculine si ton appareil en propose une.</div>
     </section>
 
 
@@ -211,6 +213,26 @@ function voixChoisie(){
   const nom=document.getElementById("voiceSelect").value || localStorage.getItem("voixRituel");
   return voixDisponibles.find(v=>v.name===nom) || voixDisponibles.find(v=>v.lang&&v.lang.toLowerCase()==="fr-fr") || voixDisponibles.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr")) || voixDisponibles[0] || null;
 }
+function detecterVoixHomme(){
+  const nomsHomme=["thomas","paul","henri","daniel","antoine","guillaume","luc","nicolas","alain","bernard","yves","jacques","male","homme","man","guy"];
+  const francaises=voixDisponibles.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"));
+  const liste=francaises.length?francaises:voixDisponibles;
+  return liste.find(v=>nomsHomme.some(n=>v.name.toLowerCase().includes(n))) || null;
+}
+function choisirVoixHommeDouce(){
+  if(!voixDisponibles.length) chargerListeVoix();
+  const voixHomme=detecterVoixHomme();
+  if(voixHomme){
+    const select=document.getElementById("voiceSelect");
+    select.value=voixHomme.name;
+    localStorage.setItem("voixRituel",voixHomme.name);
+    reglerVoix("hommeDoux");
+    statutVoix("Voix homme trouvée : " + voixHomme.name + ". Test en cours…");
+  } else {
+    reglerVoix("hommeDoux");
+    statutVoix("Je n’ai pas trouvé de voix homme sur cet appareil. J’applique quand même le réglage plus grave et plus doux.");
+  }
+}
 function reglerVoix(mode){
   styleVoix=mode; localStorage.setItem("styleVoixRituel",mode);
   testerVoix();
@@ -221,6 +243,7 @@ function parler(texte){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(texte); u.lang="fr-FR"; u.volume=1;
   if(styleVoix==="douce"){u.rate=.82; u.pitch=.9;}
+  else if(styleVoix==="hommeDoux"){u.rate=.78; u.pitch=.68;}
   else if(styleVoix==="joyeuse"){u.rate=1; u.pitch=1.18;}
   else {u.rate=.9; u.pitch=1;}
   const v=voixChoisie(); if(v) u.voice=v;
@@ -229,7 +252,7 @@ function parler(texte){
   u.onerror=()=>statutVoix("La voix est bloquée : clique une fois sur la page puis sur Tester la voix. Vérifie aussi le son de l’onglet.");
   setTimeout(()=>{speechSynthesis.resume(); speechSynthesis.speak(u);},120);
 }
-function testerVoix(){parler("Bonjour " + getPrenom() + ". Voici un test de voix pour ton rituel du matin.");}
+function testerVoix(){parler("Bonjour " + getPrenom() + ". Voici un test de voix d’homme plus douce pour ton rituel du matin.");}
 function lireRituel(){
   const meteo=document.getElementById("meteo").innerText;
   const saint=document.getElementById("saint").innerText;
