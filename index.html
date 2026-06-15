@@ -31,8 +31,8 @@
     .section{margin-top:12px;padding:13px;border-radius:20px;background:var(--section);border:1px solid rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.18)}
     .section-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;font-weight:800}
     .main-message,.dicton{font-size:.95rem;line-height:1.5}.dicton{font-style:italic}.highlight{color:var(--accent);font-weight:800}.saint{color:#fb923c;font-weight:800}
-    button,input{font:inherit} button{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);color:var(--text);padding:9px 13px;border-radius:13px;margin:4px;cursor:pointer}button:hover,button.active{background:var(--accent);color:#111827}
-    input{width:100%;margin:5px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:var(--text)}input::placeholder{color:#e5e7eb}
+    button,input,select{font:inherit} button{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);color:var(--text);padding:9px 13px;border-radius:13px;margin:4px;cursor:pointer}button:hover,button.active{background:var(--accent);color:#111827}
+    input,select{width:100%;margin:5px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:var(--text)}select option{color:#111827}input::placeholder{color:#e5e7eb}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.fond-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
     .fond-card{height:88px;border-radius:18px;border:2px solid rgba(255,255,255,.22);display:flex;align-items:flex-end;padding:9px;font-weight:900;text-shadow:0 2px 8px #000;cursor:pointer;overflow:hidden;background-size:cover;background-position:center}.fond-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(250,204,21,.35)}
     .plage{background-image:url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80")}
@@ -51,10 +51,18 @@
 
     <section class="section">
       <div class="section-title">Lecture vocale</div>
-      <button onclick="testerVoix()">🔈 Tester la voix</button>
-      <button onclick="lireRituel()">🔊 Me lire mon rituel</button>
-      <button onclick="stopVoix()">⏹️ Stop</button>
-      <div id="voiceStatus" class="small">Clique sur “Tester la voix”. Vérifie aussi que l’onglet n’est pas en muet.</div>
+      <select id="voiceSelect" onchange="sauverVoixChoisie()"></select>
+      <div class="row">
+        <button onclick="testerVoix()">🔈 Tester la voix</button>
+        <button onclick="lireRituel()">🔊 Me lire mon rituel</button>
+        <button onclick="stopVoix()">⏹️ Stop</button>
+      </div>
+      <div class="row">
+        <button onclick="reglerVoix('douce')">Voix douce</button>
+        <button onclick="reglerVoix('normale')">Voix normale</button>
+        <button onclick="reglerVoix('joyeuse')">Voix joyeuse</button>
+      </div>
+      <div id="voiceStatus" class="small">Choisis une voix puis clique sur “Tester la voix”. Les voix disponibles dépendent du téléphone ou du navigateur.</div>
     </section>
 
 
@@ -177,19 +185,51 @@ function sauverRdv(){const titre=document.getElementById("rdvTitre").value.trim(
 function supprimerRdv(vider=true){localStorage.removeItem("rdvTitre");localStorage.removeItem("rdvDate"); if(vider){document.getElementById("rdvTitre").value="";document.getElementById("rdvDate").value="";afficherRdv();}}
 afficherRdv();
 
+let voixDisponibles=[];
+let styleVoix=localStorage.getItem("styleVoixRituel")||"normale";
 function statutVoix(t){document.getElementById("voiceStatus").textContent=t;}
-function voixFr(){const voix=window.speechSynthesis? speechSynthesis.getVoices():[]; return voix.find(v=>v.lang&&v.lang.toLowerCase()==="fr-fr")||voix.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"))||voix[0]||null;}
+function chargerListeVoix(){
+  const select=document.getElementById("voiceSelect");
+  if(!("speechSynthesis" in window)){select.innerHTML='<option>Voix non disponible</option>'; return;}
+  voixDisponibles=speechSynthesis.getVoices();
+  const francaises=voixDisponibles.filter(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"));
+  const liste=francaises.length?francaises:voixDisponibles;
+  const choixSauve=localStorage.getItem("voixRituel")||"";
+  select.innerHTML="";
+  liste.forEach((v,i)=>{
+    const opt=document.createElement("option");
+    opt.value=v.name;
+    opt.textContent=v.name + " — " + v.lang;
+    if(v.name===choixSauve) opt.selected=true;
+    select.appendChild(opt);
+  });
+  if(!select.value && liste[0]) select.value=liste[0].name;
+  statutVoix(liste.length + " voix trouvée(s). Tu peux en choisir une puis tester.");
+}
+function sauverVoixChoisie(){localStorage.setItem("voixRituel",document.getElementById("voiceSelect").value); testerVoix();}
+function voixChoisie(){
+  const nom=document.getElementById("voiceSelect").value || localStorage.getItem("voixRituel");
+  return voixDisponibles.find(v=>v.name===nom) || voixDisponibles.find(v=>v.lang&&v.lang.toLowerCase()==="fr-fr") || voixDisponibles.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr")) || voixDisponibles[0] || null;
+}
+function reglerVoix(mode){
+  styleVoix=mode; localStorage.setItem("styleVoixRituel",mode);
+  testerVoix();
+}
 function parler(texte){
   if(!("speechSynthesis" in window)){statutVoix("Ce navigateur ne permet pas la voix.");return;}
+  if(!voixDisponibles.length) chargerListeVoix();
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(texte); u.lang="fr-FR"; u.rate=.9; u.pitch=1; u.volume=1;
-  const v=voixFr(); if(v) u.voice=v;
+  const u=new SpeechSynthesisUtterance(texte); u.lang="fr-FR"; u.volume=1;
+  if(styleVoix==="douce"){u.rate=.82; u.pitch=.9;}
+  else if(styleVoix==="joyeuse"){u.rate=1; u.pitch=1.18;}
+  else {u.rate=.9; u.pitch=1;}
+  const v=voixChoisie(); if(v) u.voice=v;
   u.onstart=()=>statutVoix("Lecture en cours… 🔊");
   u.onend=()=>statutVoix("Lecture terminée.");
   u.onerror=()=>statutVoix("La voix est bloquée : clique une fois sur la page puis sur Tester la voix. Vérifie aussi le son de l’onglet.");
-  setTimeout(()=>{speechSynthesis.resume(); speechSynthesis.speak(u);},80);
+  setTimeout(()=>{speechSynthesis.resume(); speechSynthesis.speak(u);},120);
 }
-function testerVoix(){parler("Bonjour " + getPrenom() + ". Si tu entends cette phrase, la voix fonctionne.");}
+function testerVoix(){parler("Bonjour " + getPrenom() + ". Voici un test de voix pour ton rituel du matin.");}
 function lireRituel(){
   const meteo=document.getElementById("meteo").innerText;
   const saint=document.getElementById("saint").innerText;
@@ -198,7 +238,11 @@ function lireRituel(){
   parler("Bonjour " + getPrenom() + ". Voici ton rituel du matin. "+meteo+". "+saint+". Le dicton du jour : "+dicton+". "+rdv);
 }
 function stopVoix(){if("speechSynthesis" in window){speechSynthesis.cancel();statutVoix("Lecture arrêtée.");}}
-if("speechSynthesis" in window){speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
+if("speechSynthesis" in window){
+  chargerListeVoix();
+  speechSynthesis.onvoiceschanged=chargerListeVoix;
+  setTimeout(chargerListeVoix,500);
+}
 </script>
 </body>
 </html>
